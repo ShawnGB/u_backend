@@ -10,11 +10,11 @@ import (
 
 func main() {
 
-	backend.InitDb()
+	backend.Initdb()
 
 	router := backend.NewRouter()
 
-	log.Fatal(http.ListenAndServe(":8000", router))
+	log.Fatal(http.ListenAndServe("localhost:8000", router))
 }
 
 // db functions
