@@ -22,34 +22,35 @@ var routes = Routes{
 	Route{
 		"users",
 		"GET",
-		"/",
+		"/users",
 		GetAllUsers,
 	},
+
 	Route{
-		"users",
+		"create user",
 		"POST",
-		"/",
+		"/users",
 		AddUser,
 	},
 
 	Route{
-		"/users/{id}",
+		"get user",
 		"GET",
-		"/",
+		"/users/{id}",
 		GetUser,
 	},
 
 	Route{
-		"/users/{id}",
+		"update user",
 		"PUT",
-		"/",
+		"/users/{id}",
 		UpdateUser,
 	},
 
 	Route{
-		"/users/{id}",
+		"delete user",
 		"DELETE",
-		"/",
+		"/users/{id}",
 		DeleteUser,
 	},
 }
