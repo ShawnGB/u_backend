@@ -109,13 +109,13 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	stmt, err := db.Prepare("DELETE FROM users WHERE _id = ?")
+	stmt, err := db.Prepare("DELETE FROM users WHERE UserId = ?")
 	if err != nil {
 		panic(err.Error())
 	}
-	_, err = stmt.Exec(params["_id"])
+	_, err = stmt.Exec(params["id"])
 	if err != nil {
 		panic(err.Error())
 	}
-	fmt.Fprintf(w, "User with ID = %s was deleted", params["_id"])
+	fmt.Fprintf(w, "User with ID = %s was deleted", params["id"])
 }
