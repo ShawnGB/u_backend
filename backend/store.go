@@ -61,14 +61,6 @@ func AddUser(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "New user was created")
 }
 
-func boolToInt(x bool) int {
-	if x {
-		return 1
-	} else {
-		return 0
-	}
-}
-
 func GetUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
@@ -89,7 +81,7 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	stmt, err := db.Prepare("UPDATE users SET FirstName = ? WHERE _id = ?")
+	stmt, err := db.Prepare("UPDATE users SET FirstName = ?, LastName = ?, Instructor = ? WHERE UserId = ?")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -97,14 +89,13 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err.Error())
 	}
-	keyVal := make(map[string]string)
-	json.Unmarshal(body, &keyVal)
-	newName := keyVal["firstName"]
-	_, err = stmt.Exec(newName, params["_id"])
+	var user User
+	json.Unmarshal(body, &user)
+	_, err = stmt.Exec(user.Firstname, user.Lastname, boolToInt(user.Instructor), params["id"])
 	if err != nil {
 		panic(err.Error())
 	}
-	fmt.Fprintf(w, "User with ID = %s was updated", params["_id"])
+	fmt.Fprintf(w, "User with ID = %s was updated", params["id"])
 }
 
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
@@ -118,4 +109,14 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		panic(err.Error())
 	}
 	fmt.Fprintf(w, "User with ID = %s was deleted", params["id"])
+}
+
+// Helper functions
+
+func boolToInt(x bool) int {
+	if x {
+		return 1
+	} else {
+		return 0
+	}
 }
