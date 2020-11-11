@@ -8,31 +8,33 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 var db *sql.DB
-var err error
 
 // connect and open db
-func InitDb() {
-	db, err = sql.Open("mysql", "shawn.becker@code.berlin:SHAWN4556FREAK!@tcp(uskillity-backend:europe-west3:uskillity)/user")
+func Initdb() *sql.DB {
+	var err error
+	db, err = sql.Open("mysql", "root@/uskillity")
 	if err != nil {
 		panic(err.Error())
 	}
-	defer db.Close()
+	return db
 }
 
 func GetAllUsers(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var users []User
-	result, err := db.Query("SELECT id, firstname")
+	result, err := db.Query("select * from users")
 	if err != nil {
 		panic(err.Error())
 	}
 	defer result.Close()
 	for result.Next() {
 		var user User
-		err := result.Scan(&user.ID, &user.Firstname)
+		err := result.Scan(&user.ID, &user.Firstname, &user.Lastname, &user.Instructor)
 		if err != nil {
 			panic(err.Error())
 		}
@@ -42,7 +44,7 @@ func GetAllUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func AddUser(w http.ResponseWriter, r *http.Request) {
-	stmt, err := db.Prepare("INSERT INTO users(firstName) VALUES(?)")
+	stmt, err := db.Prepare("INSERT INTO users(FirstName, LastName, Instructor) VALUES(?,?,?)")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -50,27 +52,34 @@ func AddUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err.Error())
 	}
-	keyVal := make(map[string]string)
-	json.Unmarshal(body, &keyVal)
-	firstname := keyVal["firstName"]
-	_, err = stmt.Exec(firstname)
+	var user User
+	json.Unmarshal(body, &user)
+	_, err = stmt.Exec(user.Firstname, user.Lastname, boolToInt(user.Instructor))
 	if err != nil {
 		panic(err.Error())
 	}
 	fmt.Fprintf(w, "New user was created")
 }
 
+func boolToInt(x bool) int {
+	if x {
+		return 1
+	} else {
+		return 0
+	}
+}
+
 func GetUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
-	result, err := db.Query("SELECT id, firstName FROM users WHERE _id = ?", params["_id"])
+	result, err := db.Query("SELECT UserId, FirstName, LastName FROM users WHERE UserId = ?", params["id"])
 	if err != nil {
 		panic(err.Error())
 	}
 	defer result.Close()
 	var user User
 	for result.Next() {
-		err := result.Scan(&user.ID, &user.Firstname)
+		err := result.Scan(&user.ID, &user.Firstname, &user.Lastname)
 		if err != nil {
 			panic(err.Error())
 		}
